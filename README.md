@@ -1,2 +1,2 @@
-# HW2
-a repo meant to host homework 2 of Moral Machine Learning
+# Homework for Moral Machine Learning
+a repo meant to host homework assignments for Moral Machine Learning
