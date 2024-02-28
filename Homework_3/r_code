@@ -1,0 +1,224 @@
+---
+title: "HW 3"
+author: "Abigail Mabe"
+date: "02/25/2024"
+output: 
+  html_document:
+    number_sections: true
+---
+
+Github Link: https://github.com/aemabe/Homework-for-Moral-Machine-Learning
+
+# 
+
+In this homework, we will discuss support vector machines and tree-based methods.  I will begin by simulating some data for you to use with SVM. 
+
+```{r}
+library(e1071)
+library(dplyr)
+set.seed(1) 
+x=matrix(rnorm(200*2),ncol=2)
+x[1:100,]=x[1:100,]+2
+x[101:150,]=x[101:150,]-2
+y=c(rep(1,150),rep(2,50))
+dat=data.frame(x=x,y=as.factor(y))
+plot(x, col=y)
+
+```
+
+##
+
+Quite clearly, the above data is not linearly separable.  Create a training-testing partition with 100 random observations in the training partition.  Fit an svm on this training data using the radial kernel, and tuning parameters $\gamma=1$, cost $=1$.  Plot the svm on the training data.  
+
+```{r}
+set.seed(1) 
+shuffle_index <- sample(1:nrow(dat), replace = FALSE)
+dat <- dat[shuffle_index, ]
+train <- dat[1:100,]
+
+svmfit <- svm(y~., data = train, kernel = "radial", gamma = 1, cost = 1, scale = FALSE)
+print(svmfit)
+plot(svmfit, train)
+
+make.grid = function(x, n = 100) {
+  grange = apply(x, 2, range)
+  x1 = seq(from = grange[1,1], to = grange[2,1], length = n)
+  x2 = seq(from = grange[1,2], to = grange[2,2], length = n)
+  expand.grid(x.1 = x1, x.2 = x2)
+}
+xgrid = make.grid(x)
+
+#overlaying prediction on the grid
+ygrid = predict(svmfit, xgrid)
+
+colors <- ifelse(ygrid == 1, "red", "blue")
+
+plot(xgrid, col = colors, pch = 20, cex = .2)
+points(x, col = ifelse(y == 1, "red", "blue"), pch = 19)
+points(train[svmfit$index, ],pch = 5, cex = 2)
+```
+
+##
+
+Notice that the above decision boundary is decidedly non-linear.  It seems to perform reasonably well, but there are indeed some misclassifications.  Let's see if increasing the cost ^[Remember this is a parameter that decides how smooth your decision boundary should be] helps our classification error rate.  Refit the svm with the radial kernel, $\gamma=1$, and a cost of 10000.  Plot this svm on the training data. 
+
+```{r}
+svmfit1 <- svm(y~., data = train, kernel = "radial", gamma = 1, cost = 10000, scale = FALSE)
+print(svmfit1)
+plot(svmfit1, train)
+
+make.grid = function(x, n = 100) {
+  grange = apply(x, 2, range)
+  x1 = seq(from = grange[1,1], to = grange[2,1], length = n)
+  x2 = seq(from = grange[1,2], to = grange[2,2], length = n)
+  expand.grid(x.1 = x1, x.2 = x2)
+}
+xgrid = make.grid(x)
+
+#overlaying prediction on the grid
+ygrid = predict(svmfit1, xgrid)
+
+colors <- ifelse(ygrid == 1, "red", "blue")
+
+plot(xgrid, col = colors, pch = 20, cex = .2)
+points(x, col = ifelse(y == 1, "red", "blue"), pch = 19)
+points(train[svmfit1$index, ],pch = 5, cex = 2)
+
+```
+
+##
+
+It would appear that we are better capturing the training data, but comment on the dangers (if any exist), of such a model. 
+
+Although we are better capturing the training data, we may be in danger of overfitting, which is a very large concern with these types of algorithms. Overfitting means the model may be fantastic at capturing the training data, but when it is applied to the testing data, it may induce bias that disadvantages that data. Therefore, increasing the cost of an SVM model is highly dangerous when considering overfitting, and reasonable options that suit both training and testing data.
+
+##
+
+Create a confusion matrix by using this svm to predict on the current testing partition.  Comment on the confusion matrix.  Is there any disparity in our classification results?    
+
+```{r}
+#remove eval = FALSE in above
+table(true=dat[!rownames(dat) %in% rownames(train),"y"], pred=predict(svmfit, newdata=dat[!rownames(dat) %in% rownames(train),]))
+```
+Looking at the above confusion matrix, there seems to be very little disparity in the classification results, with most of the predicted values matching true values. There does seem to be more predictions of class 2 that are actually class 1 (6) than predictions of class 1 that are actually class 2 (3), which is interesting considering the data frame contains more classifications of class 1 than class 2.
+
+##
+
+Is this disparity because of imbalance in the training/testing partition?  Find the proportion of class `2` in your training partition and see if it is broadly representative of the underlying 25\% of class 2 in the data as a whole.  
+
+```{r}
+sum(train$y == 2)/nrow(train)
+```
+
+According to the above calculation, it seems like the proportion of class 2 in the training set is relatively representative of the underlying 25% of class 2 observations in the data as a whole (as the training set is comprised of 29% class 2 observations). This means the misclassificationin in the testing data can be attributed to overfitting in the above model (due to the high cost), rather than for an uneven training/testing partition.
+
+##
+
+Let's try and balance the above two solutions via cross-validation.  Using the `tune` function, pass in the training data, and a list of the following cost and $\gamma$ values: {0.1, 1, 10, 100, 1000} and {0.5, 1,2,3,4}.  Save the output of this function in a variable called `tune.out`.  
+
+```{r}
+
+set.seed(1)
+tune.out <- tune(svm, y~., data = train, ranges = list(cost = c(.1, 1, 10, 100, 1000), gamma = c(.5, 1, 2, 3, 4)))
+
+```
+
+I will take `tune.out` and use the best model according to error rate to test on our data.  I will report a confusion matrix corresponding to the 100 predictions.  
+
+
+```{r}
+table(true=dat[!rownames(dat) %in% rownames(train),"y"], pred=predict(tune.out$best.model, newdata=dat[!rownames(dat) %in% rownames(train),]))
+```
+
+##
+
+Comment on the confusion matrix.  How have we improved upon the model in question 2 and what qualifications are still necessary for this improved model.  
+
+The confusion matrix looks similar to the last one, indicating little improvement in the model. However, there is some improvement in the misclassification of class 2 observations; there is only 1 observation that is predicted to be class 1 and is actually class 2. However, there is 1 more observation that is incorrectly predicted to be class 2 than in the last model. So, there are trade-offs between the classes here, but the next step should be focusing on more accurately predicting class 1 observations.
+
+# 
+Let's turn now to decision trees.  
+
+```{r}
+
+library(kmed)
+data(heart)
+library(tree)
+
+```
+
+## 
+
+The response variable is currently a categorical variable with four levels.  Convert heart disease into binary categorical variable.  Then, ensure that it is properly stored as a factor. 
+
+```{r}
+heart <- heart %>% mutate(class = ifelse(class ==0, 0, 1))
+heart$class <- factor(heart$class, levels = c(0,1))
+```
+
+## 
+
+Train a classification tree on a 240 observation training subset (using the seed I have set for you).  Plot the tree.  
+
+```{r}
+set.seed(101)
+train=sample(1:nrow(heart), 240, replace = FALSE)
+
+tree.heart = tree(class~., heart, subset = train)
+plot(tree.heart)
+text(tree.heart, pretty = 0)
+
+library(rpart.plot)
+
+heart.tree <- rpart(class~., data = heart[train,], method = "class")
+par(xpd = NA)
+
+rpart.plot(heart.tree)
+```
+
+
+## 
+
+Use the trained model to classify the remaining testing points.  Create a confusion matrix to evaluate performance.  Report the classification error rate.  
+
+```{r}
+tree.pred = predict(tree.heart, heart[-train,], type="class")
+with(heart[-train,], table(tree.pred, class))
+(28+18)/(28+18+11)
+```
+As seen above, the classification error rate is approximately 20%, which is relatively okay, although far from ideal, considering this is a tree without pruning.
+
+##  
+
+Above we have a fully grown (bushy) tree.  Now, cross validate it using the `cv.tree` command.  Specify cross validation to be done according to the misclassification rate.  Choose an ideal number of splits, and plot this tree.  Finally, use this pruned tree to test on the testing set.  Report a confusion matrix and the misclassification rate.  
+
+```{r}
+set.seed(101)
+cv.heart <- cv.tree(tree.heart, FUN = prune.misclass)
+cv.heart
+
+plot(cv.heart$size, cv.heart$dev, type = "b")
+
+prune.heart = prune.misclass(tree.heart, best = 2)
+plot(prune.heart)
+text(prune.heart, pretty=0)
+
+tree.pred = predict(prune.heart, newdata = heart[-train,], type="class")
+
+table(true=heart[-train,"class"], pred = tree.pred)
+
+(28+12)/(28+12+17)
+```
+After cross-validating the tree and pruning it to an ideal number of splits (estimated to be around 2 with the above seed), we see the above confusion matrix displays a misclassification rate of approximately 30%. This is much higher than our previous misclassification rate.
+
+##
+
+Discuss the trade-off in accuracy and interpretability in pruning the above tree. 
+
+Although interpretability may increase with pruning trees, accuracy may decrease, which is a trade-off that is important to consider when using decision trees to classify data.
+
+## 
+
+Discuss the ways a decision tree could manifest algorithmic bias.  
+
+A decision tree could manifest algorithmic bias through poor training data or through too much splitting (which leads to overfitting); both of these errors could lead to algorithmic bias on the testing data. In overfitted trees, interpretation becomes a little less clear although accuracy may be high, and trees may be lacking more accuracy in pruned models. Sometimes, it can be tricky to balance complexity and fit to make a well performing model, which can also lead to algorithmic bias.
