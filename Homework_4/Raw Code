@@ -144,10 +144,10 @@ disparate_impact
 statistical_parity <- abs(((28 + 4)/(28 + 4 + 93 + 4))-((2 + 59)/(15 + 2 + 59 + 4)))
 statistical_parity
 
-predictive_equality <-  abs((93/(93+28))-(4/6))
+predictive_equality <-  abs((28/(93+28))-(2/6))
 predictive_equality 
 
-equal_opportunity <- abs((4/8)-(15/(15+59)))
+equal_opportunity <- abs((4/8)-(59/(15+59)))
 equal_opportunity
 ```
 
