@@ -138,23 +138,22 @@ accuracy_males
 accuracy_females <- (4 + 59)/(15 + 2 + 59 + 4)
 accuracy_females
 
-disparate_impact <- ((4 + 15)/(15 + 2 + 59 + 4))/((93 + 4)/(28 + 4 + 93 + 4))
+disparate_impact <- ((28 + 4)/(28 + 4 + 93 + 4))/((2 + 59)/(15 + 2 + 59 + 4))
 disparate_impact
 
-statistical_parity <- abs(((4 + 15)/(15 + 2 + 59 + 4))-((93 + 4)/(28 + 4 + 93 + 4)))
+statistical_parity <- abs(((28 + 4)/(28 + 4 + 93 + 4))-((2 + 59)/(15 + 2 + 59 + 4)))
 statistical_parity
 
-predictive_equality <- abs((4/6)-(93/(93+28)))
+predictive_equality <- abs((4/8)-(15/(15+59)))
 predictive_equality 
 
-equal_opportunity <- abs((15/(15+59))-(4/8))
+equal_opportunity <- abs((93/(93+28))-(4/6))
 equal_opportunity
 ```
 
-For the above analysis, we can set $\epsilon$ to 0.2 for each measure, as this is standard in legal context and rarely disputed. In context, we are measuring the disparity of survival {0 is survived, 1 is non-survived}, where the "protected class" is males, and the "non-protected class" is females. First, we notice the above accuracy for males is ~75% and for females is ~78%. There doesn't seem to be a negligible disparity between the two, although we should note female accuracy is 3% higher than male accuracy. The disparate impact is way less than 1-0.2 (with a value of 0.315), meaning there is significant disparate impact between the survival of the protected and non-protected classes. Next, using statistical parity, we see 0.51 is greater than the epsilon value of 0.2, meaning there is also great statistical parity between the survival of the protected and non-protected classes. The predictive equality (which displays the absolute difference in the false positive rate between the protected and non-protected classes) is ~0.10, which is less than 0.2, and therefore does not show a problematic issue in predictive equality. However, the equal opportunity (which displays the absolute difference in the true positive rate between the protected and non-protected classes) is ~0.30, which is larger than our pre-determined $\epsilon$ of 0.2, which is problematic. Then, we can conclude the equalized odds are not met between the protected and non-protected classes (since one of the previous two tests failed).
+For the above analysis, we can set $\epsilon$ to 0.2 for each measure, as this is standard in legal context and rarely disputed. In context, we are measuring the disparity of survival {0 is non-survived, 1 is survived}, where the "protected class" is females, and the "non-protected class" is males. First, we notice the above accuracy for males is ~75% and for females is ~78%. There doesn't seem to be a negligible disparity between the two, although we should note female accuracy is 3% higher than male accuracy. The disparate impact is way less than 1-0.2 (with a value of 0.33), meaning there is significant disparate impact between the survival of the protected and non-protected classes. Next, using statistical parity, we see 0.51 is greater than the epsilon value of 0.2, meaning there is also great statistical parity between the survival of the protected and non-protected classes. The predictive equality (which displays the absolute difference in the false positive rate between the protected and non-protected classes) is ~0.29, which is larger than our pre-determined $\epsilon$ of 0.2, which is problematic. However, the equal opportunity (which displays the absolute difference in the true positive rate between the protected and non-protected classes) is ~0.10,  which is less than 0.2, and therefore does not show a problematic issue in equal opportunity. Then, we can conclude the equalized odds are not met between the protected and non-protected classes (since one of the previous two tests failed).
 
 It is always important for us to interpret our results in light of the original data and the context of the analysis.  In this case, it is relevant that we are analyzing a historical event post-facto and any disparities across demographics identified are unlikely to be replicated.  So even though our model fails numerous of the statistical fairness criteria, I would argue we need not worry that our model could be misused to perpetuate discrimination in the future.  After all, this model is likely not being used to prescribe a preferred method of treatment in the future.  
-
 
 #
 
