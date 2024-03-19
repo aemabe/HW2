@@ -137,6 +137,7 @@ accuracy_males <- (93 + 4)/(28 + 4 + 93 + 4)
 accuracy_males
 accuracy_females <- (4 + 59)/(15 + 2 + 59 + 4)
 accuracy_females
+accuracy_males/accuracy_females
 
 disparate_impact <- ((4 + 4)/(28 + 4 + 93 + 4))/((15 + 59)/(15 + 2 + 59 + 4))
 disparate_impact
