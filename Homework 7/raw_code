@@ -19,7 +19,7 @@ For a potentially biased coin, the generalized expression for the proportion of 
 #
 Next, show that this expression reduces to our result from class in the special case where $\theta = \frac{1}{2}$.
 
-When $\theta = \frac{1}{2}$, and utilizing the expression above, we see $\hat{P} = \frac{\pi - (1-\theta)\theta}{\theta}$ becomes $\hat{P} = \frac{\hat{\pi} - (\frac{1}{2})(\frac{1}{2})}{\frac{1}{2}}$ or $2\hat{P} = \hat{\pi} - (\frac{1}{4})$. Then, we can observe this is equivalent to the expression $\hat{P} = 2{\hat{\pi}} - (\frac{1}{2})$ as deduced in class. 
+When $\theta = \frac{1}{2}$, and utilizing the expression above, we see $\hat{P} = \frac{\hat{\pi} - (1-\theta)\theta}{\theta}$ becomes $\hat{P} = \frac{\hat{\pi} - (\frac{1}{2})(\frac{1}{2})}{\frac{1}{2}}$ or $2\hat{P} = \hat{\pi} - (\frac{1}{4})$. Then, we can observe this is equivalent to the expression $\hat{P} = 2{\hat{\pi}} - (\frac{1}{2})$ as deduced in class. 
 
 #
 Consider the additive feature attribution model: $g(x') = \phi_0+\sum_{i=1}^M{\phi_ix_i'}$ where we are aiming to explain prediction $f$ with model $g$ around input $x$ with simplified input $x'$.  Moreover, $M$ is the number of input features.  
